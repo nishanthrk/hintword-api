@@ -117,7 +117,7 @@ jobs:
           # Run the new container
           sudo docker run -d \
             --name hintword-api \
-            -p 9090:9090 \
+            -p 9099:9099 \
             -v ~/hintword/.env:/hintword-api/.env \
             --restart unless-stopped \
             $ECR_REGISTRY/$ECR_REPOSITORY:latest"
