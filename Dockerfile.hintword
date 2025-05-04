@@ -9,7 +9,7 @@ RUN go mod download
 # Copy only the necessary files for the build
 COPY . .
 
-RUN go build -a -o workdone
+RUN go build -a -o hintword
 
 # Stage 2: Runtime Stage
 FROM golang:alpine
@@ -18,7 +18,7 @@ FROM golang:alpine
 WORKDIR /hintword-api
 
 # Copy only the built binary from the build stage
-COPY --from=builder /hintword-api/workdone .
+COPY --from=builder /hintword-api/hintword .
 
 # Copy migrations folder
 COPY --from=builder /hintword-api/migrations ./migrations
@@ -26,5 +26,5 @@ COPY --from=builder /hintword-api/migrations ./migrations
 # Create directory for environment file
 RUN mkdir -p /hintword-api
 
-CMD ["./workdone"]
-EXPOSE 9090
+CMD ["./hintword"]
+EXPOSE 9099
