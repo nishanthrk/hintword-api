@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -9,13 +10,14 @@ import (
 	log "github.com/sirupsen/logrus"
 	"hintword.com/api/migrations"
 
+	"os"
+	"os/signal"
+	"syscall"
+
 	"hintword.com/api/app/common/constants"
 	cfg "hintword.com/api/app/configs"
 	db "hintword.com/api/app/database"
 	"hintword.com/api/app/routes"
-	"os"
-	"os/signal"
-	"syscall"
 )
 
 func main() {
@@ -86,6 +88,7 @@ func main() {
 
 	// Setup routes
 	routes.SetupRoutes(app)
+	routes.SetupWsRoute(app)
 
 	// Load tenant level configuration
 

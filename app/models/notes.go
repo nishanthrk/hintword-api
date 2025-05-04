@@ -1,15 +1,16 @@
 package models
 
 import (
-	"gorm.io/datatypes"
 	"time"
+
+	"gorm.io/datatypes"
 )
 
 // Notes [...]
 type Notes struct {
-	ID        string         `gorm:"primaryKey;column:id" json:"-"`
+	ID        string         `gorm:"primaryKey;column:id" json:"id"`
 	UserID    string         `gorm:"column:user_id" json:"userId"`
-	Users     Users          `gorm:"joinForeignKey:user_id;foreignKey:id;references:UserID" json:"usersList"`
+	Users     Users          `gorm:"joinForeignKey:user_id;foreignKey:id;references:UserID" json:"-"`
 	Title     string         `gorm:"column:title" json:"title"`
 	Content   string         `gorm:"column:content" json:"content"`
 	Folder    string         `gorm:"column:folder" json:"folder"`

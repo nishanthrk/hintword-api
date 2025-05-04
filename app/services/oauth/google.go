@@ -3,10 +3,7 @@ package oauth
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/golang-jwt/jwt/v5"
-	cfg "hintword.com/api/app/configs"
 	"net/http"
-	"time"
 )
 
 type GoogleTokenResponse struct {
@@ -60,14 +57,4 @@ func GetGoogleUserInfo(accessToken string) (*GoogleUserInfo, error) {
 	}
 
 	return &userInfo, nil
-}
-
-func GenerateJWTToken(userID string) (string, error) {
-	claims := jwt.MapClaims{
-		"user_id": userID,
-		"exp":     time.Now().Add(time.Hour * 24).Unix(),
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(cfg.GetConfig().JWTAccessSecret))
 }

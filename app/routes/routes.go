@@ -3,6 +3,7 @@ package routes
 import (
 	"github.com/gofiber/fiber/v2"
 	authController "hintword.com/api/app/controllers/v1/auth"
+	noteController "hintword.com/api/app/controllers/v1/note"
 	"hintword.com/api/app/middlewares"
 )
 
@@ -23,4 +24,9 @@ func SetupRoutes(app *fiber.App) {
 
 	auth := v1.Group("/auth")
 	auth.Post("/google/user-info", authController.GoogleUserInfo)
+
+	note := v1.Group("/note", middlewares.RequireLoggedIn())
+
+	// Note routes
+	note.Get("/list", noteController.GetNoteList)
 }

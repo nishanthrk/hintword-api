@@ -4,10 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"hintword.com/api/app/common/constants"
 	cfg "hintword.com/api/app/configs"
 
-	jwt "github.com/form3tech-oss/jwt-go"
 	"github.com/gofiber/fiber/v2"
 	jwtware "github.com/gofiber/jwt/v2"
 )
@@ -39,7 +37,7 @@ func jwtError(c *fiber.Ctx, err error) error {
 			errorList,
 			&fiber.Error{
 				Code:    fiber.StatusUnauthorized,
-				Message: "Missing or Malformed Authentication Token",
+				Message: "Missing or Malformed Authentication AccessToken",
 			},
 		)
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"errors": errorList})
@@ -50,30 +48,8 @@ func jwtError(c *fiber.Ctx, err error) error {
 		errorList,
 		&fiber.Error{
 			Code:    fiber.StatusUnauthorized,
-			Message: "Invalid or Expired Authentication Token",
+			Message: "Invalid or Expired Authentication AccessToken",
 		},
 	)
 	return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"errors": errorList})
-}
-
-// RequireEmployee RequireAdmin Ensures A route Can Only Be Accessed by an Admin user
-// This function can be extended to handle different roles
-func RequireEmployee(c *fiber.Ctx) error {
-	user := c.Locals("user").(*jwt.Token)
-	claims := user.Claims.(jwt.MapClaims)
-	role := claims["userType"].(string)
-
-	var errorList []*fiber.Error
-
-	if role != constants.USER_TYPE_EMPLOYEE {
-		errorList = append(
-			errorList,
-			&fiber.Error{
-				Code:    fiber.StatusUnauthorized,
-				Message: "You're Not Authorized",
-			},
-		)
-		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"errors": errorList})
-	}
-	return c.Next()
 }
