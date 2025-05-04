@@ -1,8 +1,9 @@
 package user_handler
 
 import (
-	"github.com/guregu/null"
 	"time"
+
+	"github.com/guregu/null"
 )
 
 type UserParams struct {
@@ -20,4 +21,12 @@ type UserParams struct {
 	Pincode         null.String `json:"pincode"`
 	CreatedAt       time.Time   `json:"created_at"`
 	Status          int         `json:"status"`
+}
+
+var UserInfoRequest struct {
+	Name     string `json:"name" validate:"required"`
+	Email    string `json:"email" validate:"required"`
+	Mobile   string `json:"mobile" validate:"required"`
+	Avatar   string `json:"avatar" validate:"required"`
+	GoogleID string `json:"google_id" validate:"required"`
 }

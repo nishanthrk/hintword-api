@@ -22,5 +22,5 @@ func SetupRoutes(app *fiber.App) {
 	v1.Get("/", welcomeFunction)
 
 	auth := v1.Group("/auth")
-	auth.Get("/google", authController.GoogleAuth)
+	auth.Post("/google/user-info", authController.GoogleUserInfo)
 }

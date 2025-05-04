@@ -20,6 +20,38 @@ var (
 	MysqlDB *gorm.DB
 )
 
+func setupGORMCallbacks(db *gorm.DB) error {
+	handleConnectionError := func(tx *gorm.DB) {
+		if tx.Error != nil && (strings.Contains(tx.Error.Error(), "connect: cannot assign requested address") ||
+			strings.Contains(tx.Error.Error(), "connect: connection refused") ||
+			strings.Contains(tx.Error.Error(), "invalid connection")) {
+			log.Println(strings.Repeat("!", 40))
+			log.Println("😔 Database connection lost")
+			log.Println(strings.Repeat("!", 40))
+			log.Fatal(tx.Error)
+		}
+	}
+
+	callbacks := []struct {
+		name     string
+		callback func(name string, fn func(*gorm.DB)) error
+	}{
+		{"gorm:raw", db.Callback().Raw().After("gorm:raw").Register},
+		{"gorm:query", db.Callback().Query().After("gorm:query").Register},
+		{"gorm:create", db.Callback().Create().After("gorm:create").Register},
+		{"gorm:update", db.Callback().Update().After("gorm:update").Register},
+		{"gorm:delete", db.Callback().Delete().After("gorm:delete").Register},
+	}
+
+	for _, cb := range callbacks {
+		if err := cb.callback("check_connection_error", handleConnectionError); err != nil {
+			return fmt.Errorf("failed to register callback for %s: %w", cb.name, err)
+		}
+	}
+
+	return nil
+}
+
 func ConnectMysql() {
 	dsn := cfg.GetConfig().Mysql.GetMysqlConnectionInfo()
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
@@ -46,11 +78,19 @@ func ConnectMysql() {
 	// Set maximum number of idle connections
 	sqlDB.SetMaxIdleConns(5)
 
+	// Setup GORM callbacks
+	if err := setupGORMCallbacks(db); err != nil {
+		log.Println(strings.Repeat("!", 40))
+		log.Println("😏 Failed to setup GORM callbacks")
+		log.Println(strings.Repeat("!", 40))
+		log.Fatal(err)
+	}
+
+	MysqlDB = db
+
 	log.Println(strings.Repeat("-", 40))
 	log.Println("😀 Connected To Mysql DB")
 	log.Println(strings.Repeat("-", 40))
-
-	MysqlDB = db
 }
 
 type WhereCondition struct {

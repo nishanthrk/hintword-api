@@ -5,10 +5,11 @@
 
 CREATE TABLE `users` (
   `id` char(36) COLLATE utf8mb4_general_ci NOT NULL,
-  `google_id` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `google_id` varchar(255) COLLATE utf8mb4_general_ci NULL,
   `email` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
   `name` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
   `avatar_url` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `status` varchar(36) COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'ACTIVE',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
