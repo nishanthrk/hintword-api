@@ -1,6 +1,7 @@
-package user
+package user_service
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -8,7 +9,6 @@ import (
 	"github.com/gofiber/websocket/v2"
 	"github.com/golang-jwt/jwt/v4"
 	"hintword.com/api/app/common/utility"
-	"hintword.com/api/app/database"
 	"hintword.com/api/app/models"
 
 	cfg "hintword.com/api/app/configs"
@@ -38,9 +38,9 @@ type GoogleUserInfo struct {
 func HandleGoogleUserInfo(params GoogleUserInfo) (string, error) {
 	var user models.Users
 	user, _ = user.FindByEmail(params.Email)
-	if user.ID == "" {
+	if user.UserID == "" {
 		user = models.Users{
-			ID:       utility.GenerateUUID(),
+			UserID:   utility.GenerateUUID(),
 			Email:    params.Email,
 			Name:     params.Name,
 			GoogleID: params.GoogleID,
@@ -55,7 +55,7 @@ func HandleGoogleUserInfo(params GoogleUserInfo) (string, error) {
 	}
 
 	// Generate JWT token
-	jwtToken, err := GenerateToken(user.ID)
+	jwtToken, err := GenerateToken(user.UserID)
 	if err != nil {
 		return "", fmt.Errorf("failed to generate token: %v", err)
 	}
@@ -64,12 +64,12 @@ func HandleGoogleUserInfo(params GoogleUserInfo) (string, error) {
 }
 
 func GetUserObject(c interface{}) (details UserDetails) {
-	// defer func() {
-	// 	if r := recover(); r != nil {
-	// 		fmt.Printf("recovered from panic %v", r)
-	// 	}
-	// 	return
-	// }()
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Printf("recovered from panic %v", r)
+		}
+		return
+	}()
 
 	var user *jwt.Token
 	if ctx, ok := c.(*fiber.Ctx); ok {
@@ -98,14 +98,15 @@ func GetUserObject(c interface{}) (details UserDetails) {
 func GenerateToken(userID string) (string, error) {
 	// Get user details from database
 	var user models.Users
-	if err := database.MysqlDB.Where("id = ?", userID).First(&user).Error; err != nil {
-		return "", fmt.Errorf("failed to get user: %v", err)
+	user, _ = user.FindById(userID)
+	if user.UserID == "" {
+		return "", errors.New("user not found")
 	}
 
 	expireTime := time.Now().Add(time.Hour * 24)
 
 	claims := UserClaims{
-		user.ID,
+		user.UserID,
 		user.Email,
 		user.Name,
 		jwt.RegisteredClaims{

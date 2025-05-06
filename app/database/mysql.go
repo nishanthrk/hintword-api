@@ -65,21 +65,21 @@ func ConnectMysql() {
 		log.Fatal(err)
 	}
 
-	// Set maximum number of open connections
-	sqlDB, err := db.DB()
-	if err != nil {
-		log.Println(strings.Repeat("!", 40))
-		log.Println("😏 Set maximum number of open connections")
-		log.Println(strings.Repeat("!", 40))
-		log.Fatal(err)
-	}
-	sqlDB.SetMaxOpenConns(10)
+	//// Set maximum number of open connections
+	//sqlDB, err := db.DB()
+	//if err != nil {
+	//	log.Println(strings.Repeat("!", 40))
+	//	log.Println("😏 Set maximum number of open connections")
+	//	log.Println(strings.Repeat("!", 40))
+	//	log.Fatal(err)
+	//}
+	//sqlDB.SetMaxOpenConns(10)
 
 	// Set maximum number of idle connections
-	sqlDB.SetMaxIdleConns(5)
+	//sqlDB.SetMaxIdleConns(5)
 
 	// Setup GORM callbacks
-	if err := setupGORMCallbacks(db); err != nil {
+	if err = setupGORMCallbacks(db); err != nil {
 		log.Println(strings.Repeat("!", 40))
 		log.Println("😏 Failed to setup GORM callbacks")
 		log.Println(strings.Repeat("!", 40))

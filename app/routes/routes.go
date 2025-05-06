@@ -4,6 +4,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	authController "hintword.com/api/app/controllers/v1/auth"
 	noteController "hintword.com/api/app/controllers/v1/note"
+	tabController "hintword.com/api/app/controllers/v1/tab"
 	"hintword.com/api/app/middlewares"
 )
 
@@ -29,4 +30,9 @@ func SetupRoutes(app *fiber.App) {
 
 	// Note routes
 	note.Get("/list", noteController.GetNoteList)
+
+	tab := v1.Group("/tab", middlewares.RequireLoggedIn())
+	tab.Post("/collection", tabController.CreateUpdateCollection)
+	tab.Get("/collection", tabController.GetCollection)
+	tab.Post("/create", tabController.CreateUpdateTab)
 }

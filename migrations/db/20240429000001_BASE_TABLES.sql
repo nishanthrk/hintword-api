@@ -4,7 +4,7 @@
 --
 
 CREATE TABLE `users` (
-  `id` char(36) COLLATE utf8mb4_general_ci NOT NULL,
+  `user_id` char(36) COLLATE utf8mb4_general_ci NOT NULL,
   `google_id` varchar(255) COLLATE utf8mb4_general_ci NULL,
   `email` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
   `name` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
@@ -12,7 +12,7 @@ CREATE TABLE `users` (
   `status` varchar(36) COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'ACTIVE',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
+  PRIMARY KEY (`user_id`),
   UNIQUE KEY `idx_google_id` (`google_id`),
   UNIQUE KEY `idx_email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -24,14 +24,15 @@ CREATE TABLE `users` (
 --
 
 CREATE TABLE `collections` (
-  `id` char(36) COLLATE utf8mb4_general_ci NOT NULL,
+  `collection_id` char(36) COLLATE utf8mb4_general_ci NOT NULL,
   `user_id` char(36) COLLATE utf8mb4_general_ci NOT NULL,
   `name` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `status` varchar(36) COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'ACTIVE',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
+  PRIMARY KEY (`collection_id`),
   KEY `idx_user_id` (`user_id`),
-  CONSTRAINT `fk_collections_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+  CONSTRAINT `fk_collections_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -41,19 +42,20 @@ CREATE TABLE `collections` (
 --
 
 CREATE TABLE `tabs` (
-  `id` char(36) COLLATE utf8mb4_general_ci NOT NULL,
+  `tab_id` char(36) COLLATE utf8mb4_general_ci NOT NULL,
   `collection_id` char(36) COLLATE utf8mb4_general_ci NOT NULL,
   `user_id` char(36) COLLATE utf8mb4_general_ci NOT NULL,
   `title` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
   `url` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
   `favicon_url` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `status` varchar(36) COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'ACTIVE',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
+  PRIMARY KEY (`tab_id`),
   KEY `idx_collection_id` (`collection_id`),
   KEY `idx_user_id` (`user_id`),
-  CONSTRAINT `fk_tabs_collection` FOREIGN KEY (`collection_id`) REFERENCES `collections` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_tabs_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+  CONSTRAINT `fk_tabs_collection` FOREIGN KEY (`collection_id`) REFERENCES `collections` (`collection_id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_tabs_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -63,17 +65,18 @@ CREATE TABLE `tabs` (
 --
 
 CREATE TABLE `notes` (
-  `id` char(36) COLLATE utf8mb4_general_ci NOT NULL,
+  `note_id` char(36) COLLATE utf8mb4_general_ci NOT NULL,
   `user_id` char(36) COLLATE utf8mb4_general_ci NOT NULL,
   `title` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
   `content` longtext COLLATE utf8mb4_general_ci NOT NULL,
   `folder` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `status` varchar(36) COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'ACTIVE',
   `tags` json DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
+  PRIMARY KEY (`note_id`),
   KEY `idx_user_id` (`user_id`),
-  CONSTRAINT `fk_notes_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+  CONSTRAINT `fk_notes_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- +goose Down

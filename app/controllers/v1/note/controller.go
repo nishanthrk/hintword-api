@@ -1,4 +1,4 @@
-package note
+package note_controller
 
 import (
 	"encoding/json"
@@ -10,18 +10,13 @@ import (
 	"hintword.com/api/app/common/utility"
 	"hintword.com/api/app/database"
 	"hintword.com/api/app/models"
-	"hintword.com/api/app/services/user"
+	userService "hintword.com/api/app/services/user"
 )
-
-type NoteMessage struct {
-	NoteID  string       `json:"note_id,omitempty"`
-	Payload models.Notes `json:"payload"`
-}
 
 // HandleNoteSync handles real-time note synchronization via WebSocket
 func HandleNoteSync(c *websocket.Conn) {
 	// Get user from context
-	userDetails := user.GetUserObject(c)
+	userDetails := userService.GetUserObject(c)
 
 	defer func() {
 		err := c.Close()
@@ -40,7 +35,7 @@ func HandleNoteSync(c *websocket.Conn) {
 		}
 
 		// Parse incoming message
-		var noteMsg NoteMessage
+		var noteMsg CreateMessage
 		if err := json.Unmarshal(msg, &noteMsg); err != nil {
 			fmt.Printf("Invalid message format for user %s: %v\n", userDetails.UserId, err)
 			// Send error response back to client
@@ -49,7 +44,10 @@ func HandleNoteSync(c *websocket.Conn) {
 				"error":  "Invalid message format",
 			}
 			if responseMsg, err := json.Marshal(errorResponse); err == nil {
-				c.WriteMessage(websocket.TextMessage, responseMsg)
+				err = c.WriteMessage(websocket.TextMessage, responseMsg)
+				if err != nil {
+					return
+				}
 			}
 			continue
 		}
@@ -62,10 +60,10 @@ func HandleNoteSync(c *websocket.Conn) {
 		var response map[string]interface{}
 
 		// If noteId is present in payload, it's an update
-		if noteMsg.Payload.ID != "" {
+		if noteMsg.Payload.NoteID != "" {
 			// Update existing note
 			if err := database.MysqlDB.Model(&models.Notes{}).
-				Where("id = ? AND user_id = ?", noteMsg.Payload.ID, userDetails.UserId).
+				Where("note_id = ? AND user_id = ?", noteMsg.Payload.NoteID, userDetails.UserId).
 				Updates(&noteMsg.Payload).Error; err != nil {
 				response = map[string]interface{}{
 					"status": 0,
@@ -80,7 +78,7 @@ func HandleNoteSync(c *websocket.Conn) {
 		} else {
 			// Create new note
 			noteMsg.Payload.CreatedAt = now
-			noteMsg.Payload.ID = utility.GenerateUUID()
+			noteMsg.Payload.NoteID = utility.GenerateUUID()
 			if err := database.MysqlDB.Create(&noteMsg.Payload).Error; err != nil {
 				response = map[string]interface{}{
 					"status": 0,
@@ -106,7 +104,7 @@ func HandleNoteSync(c *websocket.Conn) {
 
 // GetNoteList handles getting a list of notes for the authenticated user
 func GetNoteList(c *fiber.Ctx) error {
-	userDetails := user.GetUserObject(c)
+	userDetails := userService.GetUserObject(c)
 	var notes []models.Notes
 
 	if err := database.MysqlDB.Where("user_id = ?", userDetails.UserId).Find(&notes).Error; err != nil {
