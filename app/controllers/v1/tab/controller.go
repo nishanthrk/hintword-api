@@ -82,6 +82,7 @@ func CreateUpdateTab(c *fiber.Ctx) error {
 	tab.URL = params.URL
 	tab.FaviconURL = params.FaviconURL
 	tab.Status = params.Status
+	tab.Sequence = params.Sequence
 	tab.CollectionID = collection.CollectionID
 	tab, err := tab.Save()
 	if err != nil {
@@ -104,6 +105,7 @@ func GetCollection(c *fiber.Ctx) error {
 	if err := database.MysqlDB.
 		Where("user_id = ?", userDetails.UserId).
 		Where("status = ?", models.StatusActive).
+		Order("created_at desc").
 		Find(&collections).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"status": -1,

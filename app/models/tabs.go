@@ -17,6 +17,7 @@ type Tabs struct {
 	Title        string      `gorm:"column:title" json:"title"`
 	URL          string      `gorm:"column:url" json:"url"`
 	FaviconURL   string      `gorm:"column:favicon_url" json:"favicon_url"`
+	Sequence     int64       `gorm:"column:sequence" json:"sequence"`
 	Status       string      `gorm:"column:status" json:"status"`
 	CreatedAt    time.Time   `gorm:"column:created_at" json:"created_at"`
 	UpdatedAt    time.Time   `gorm:"column:updated_at" json:"updated_at"`
@@ -35,6 +36,7 @@ var TabsColumns = struct {
 	Title        string
 	URL          string
 	FaviconURL   string
+	Sequence     string
 	Status       string
 	CreatedAt    string
 	UpdatedAt    string
@@ -45,6 +47,7 @@ var TabsColumns = struct {
 	Title:        "title",
 	URL:          "url",
 	FaviconURL:   "favicon_url",
+	Sequence:     "sequence",
 	Status:       "status",
 	CreatedAt:    "created_at",
 	UpdatedAt:    "updated_at",
@@ -81,6 +84,9 @@ func (m *Tabs) FindById(tabID string) (result Tabs, err error) {
 }
 
 func (m *Tabs) FindByCollectionId(collectionId string) (result []Tabs, err error) {
-	err = database.MysqlDB.Model(m).Where("`collection_id` = ?", collectionId).Find(&result).Error
+	err = database.MysqlDB.Model(m).
+		Where("`collection_id` = ?", collectionId).
+		Order("`sequence` asc").
+		Find(&result).Error
 	return
 }

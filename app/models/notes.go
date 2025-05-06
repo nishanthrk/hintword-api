@@ -1,6 +1,7 @@
 package models
 
 import (
+	"github.com/guregu/null"
 	"time"
 
 	"gorm.io/datatypes"
@@ -8,16 +9,17 @@ import (
 
 // Notes [...]
 type Notes struct {
-	NoteID    string         `gorm:"primaryKey;column:note_id" json:"note_id"`
-	UserID    string         `gorm:"column:user_id" json:"user_id"`
-	Users     Users          `gorm:"joinForeignKey:user_id;foreignKey:user_id;references:UserID" json:"users,omitempty"`
-	Title     string         `gorm:"column:title" json:"title"`
-	Content   string         `gorm:"column:content" json:"content"`
-	Folder    string         `gorm:"column:folder" json:"folder"`
-	Tags      datatypes.JSON `gorm:"column:tags" json:"tags"`
-	Status    string         `gorm:"column:status" json:"status"`
-	CreatedAt time.Time      `gorm:"column:created_at" json:"created_at"`
-	UpdatedAt time.Time      `gorm:"column:updated_at" json:"updated_at"`
+	NoteID    string          `gorm:"primaryKey;column:note_id" json:"note_id"`
+	UserID    string          `gorm:"column:user_id" json:"user_id"`
+	Users     Users           `gorm:"joinForeignKey:user_id;foreignKey:user_id;references:UserID" json:"users,omitempty"`
+	Title     string          `gorm:"column:title" json:"title"`
+	Content   string          `gorm:"column:content" json:"content"`
+	Folder    null.String     `gorm:"column:folder" json:"folder"`
+	Tags      *datatypes.JSON `gorm:"column:tags" json:"tags"`
+	Sequence  null.Int        `gorm:"column:sequence" json:"sequence"`
+	Status    string          `gorm:"column:status" json:"status"`
+	CreatedAt time.Time       `gorm:"column:created_at" json:"created_at"`
+	UpdatedAt time.Time       `gorm:"column:updated_at" json:"updated_at"`
 }
 
 // TableName get sql table name.
@@ -33,6 +35,7 @@ var NotesColumns = struct {
 	Content   string
 	Folder    string
 	Tags      string
+	Sequence  string
 	Status    string
 	CreatedAt string
 	UpdatedAt string
@@ -43,6 +46,7 @@ var NotesColumns = struct {
 	Content:   "content",
 	Folder:    "folder",
 	Tags:      "tags",
+	Sequence:  "sequence",
 	Status:    "status",
 	CreatedAt: "created_at",
 	UpdatedAt: "updated_at",

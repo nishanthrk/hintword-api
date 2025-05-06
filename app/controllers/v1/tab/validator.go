@@ -12,5 +12,6 @@ type PayloadTab struct {
 	URL          string `json:"url" validate:"required"`
 	FaviconURL   string `json:"favicon_url" validate:"required"`
 	CollectionID string `json:"collection_id" validate:"required"`
+	Sequence     int64  `json:"sequence" validate:"required"`
 	Status       string `json:"status" validate:"oneof=ACTIVE INACTIVE"`
 }
