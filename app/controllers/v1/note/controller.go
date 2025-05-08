@@ -150,7 +150,10 @@ func GetNoteList(c *fiber.Ctx) error {
 	userDetails := userService.GetUserObject(c)
 	var notes []models.Notes
 
-	if err := database.MysqlDB.Where("user_id = ?", userDetails.UserId).Find(&notes).Error; err != nil {
+	if err := database.MysqlDB.Where("user_id = ?", userDetails.UserId).
+		Find(&notes).
+		Order("updated_at desc").
+		Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"status": 0,
 			"error":  fmt.Sprintf("Failed to fetch notes: %v", err),
