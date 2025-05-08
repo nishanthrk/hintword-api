@@ -6,3 +6,11 @@ type CreateMessage struct {
 	NoteID  string       `json:"note_id,omitempty"`
 	Payload models.Notes `json:"payload"`
 }
+
+type PayloadNote struct {
+	NoteID   string `json:"note_id,omitempty"`
+	Title    string `json:"title" validate:"required"`
+	Content  string `json:"content" validate:"required"`
+	Sequence int64  `json:"sequence" validate:"required"`
+	Status   string `json:"status" validate:"oneof=ACTIVE INACTIVE"`
+}

@@ -2,6 +2,7 @@ package models
 
 import (
 	"github.com/guregu/null"
+	"hintword.com/api/app/database"
 	"time"
 
 	"gorm.io/datatypes"
@@ -11,7 +12,7 @@ import (
 type Notes struct {
 	NoteID    string          `gorm:"primaryKey;column:note_id" json:"note_id"`
 	UserID    string          `gorm:"column:user_id" json:"user_id"`
-	Users     Users           `gorm:"joinForeignKey:user_id;foreignKey:user_id;references:UserID" json:"users,omitempty"`
+	Users     Users           `gorm:"joinForeignKey:user_id;foreignKey:user_id;references:UserID" json:"-"`
 	Title     string          `gorm:"column:title" json:"title"`
 	Content   string          `gorm:"column:content" json:"content"`
 	Folder    null.String     `gorm:"column:folder" json:"folder"`
@@ -50,4 +51,21 @@ var NotesColumns = struct {
 	Status:    "status",
 	CreatedAt: "created_at",
 	UpdatedAt: "updated_at",
+}
+
+func (m *Notes) FindById(noteId string) (result Notes, err error) {
+	err = database.MysqlDB.Model(m).Where("`note_id` = ?", noteId).Find(&result).Error
+	return
+}
+
+func (m *Notes) FindByUser(noteId string, userId string) (result Notes, err error) {
+	err = database.MysqlDB.Model(m).
+		Where("`note_id` = ?", noteId).Where("`user_id` = ?", userId).
+		Find(&result).Error
+	return
+}
+
+func (m *Notes) Save() (result Notes, err error) {
+	err = database.MysqlDB.Save(m).Error
+	return *m, err
 }

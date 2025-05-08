@@ -3,6 +3,9 @@ package note_controller
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/guregu/null"
+	"hintword.com/api/app/common/validator"
+	"net/http"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -12,6 +15,46 @@ import (
 	"hintword.com/api/app/models"
 	userService "hintword.com/api/app/services/user"
 )
+
+func CreateUpdateNote(c *fiber.Ctx) error {
+	params := PayloadNote{}
+	if err := validator.ParseBodyAndValidate(c, &params); err != nil {
+		return c.Status(http.StatusUnprocessableEntity).JSON(&fiber.Map{
+			"status": -1,
+			"error":  err,
+		})
+	}
+	userDetails := userService.GetUserObject(c)
+	note := models.Notes{}
+	note, _ = note.FindByUser(params.NoteID, userDetails.UserId)
+	if note.NoteID == "" && params.NoteID != "" {
+		return c.Status(http.StatusUnprocessableEntity).JSON(&fiber.Map{
+			"status": -1,
+			"error":  "invalid note id given",
+		})
+	}
+
+	if note.NoteID == "" {
+		note.NoteID = utility.GenerateUUID()
+		note.UserID = userDetails.UserId
+	}
+	note.Title = params.Title
+	note.Content = params.Content
+	note.Status = params.Status
+	note.Sequence = null.IntFrom(params.Sequence)
+	note, err := note.Save()
+	if err != nil {
+		return c.Status(http.StatusUnprocessableEntity).JSON(&fiber.Map{
+			"status": -3,
+			"error":  err.Error(),
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"status": 1,
+		"data":   note,
+	})
+}
 
 // HandleNoteSync handles real-time note synchronization via WebSocket
 func HandleNoteSync(c *websocket.Conn) {

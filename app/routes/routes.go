@@ -30,6 +30,7 @@ func SetupRoutes(app *fiber.App) {
 
 	// Note routes
 	note.Get("/list", noteController.GetNoteList)
+	note.Post("/create", noteController.CreateUpdateNote)
 
 	tab := v1.Group("/tab", middlewares.RequireLoggedIn())
 	tab.Post("/collection", tabController.CreateUpdateCollection)
