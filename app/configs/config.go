@@ -3,13 +3,14 @@ package configs
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/service/ssm"
 	"log"
 	"os"
 	"path/filepath"
 	"reflect"
 	"strings"
+
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/ssm"
 
 	"github.com/joho/godotenv"
 )
@@ -38,11 +39,8 @@ type Config struct {
 	GoogleOauthClientId       string      `env:"GOOGLE_OAUTH_CLIENT_ID"`
 	GoogleOauthClientSecret   string      `env:"GOOGLE_OAUTH_CLIENT_SECRET"`
 	GoogleOauthRedirectionUrl string      `env:"GOOGLE_OAUTH_REDIRECTION_URL"`
-
-	/*RedisHost                   string      `env:"REDIS_HOST"`
-	RedisPost                   string      `env:"REDIS_PORT"`
-	RedisDB                     string      `env:"REDIS_DB"`
-	RedisPassword               string      `env:"REDIS_PASSWORD"`*/
+	OpenApiKey                string      `env:"OPENAI_API_KEY"`
+	OpenApiUrl                string      `env:"OPENAI_API_URL"`
 }
 
 // IsProd Checks if env is production
@@ -172,6 +170,8 @@ func GetConfig() Config {
 		GoogleOauthClientId:       getEnv("GOOGLE_OAUTH_CLIENT_ID"),
 		GoogleOauthClientSecret:   getEnv("GOOGLE_OAUTH_CLIENT_SECRET"),
 		GoogleOauthRedirectionUrl: getEnv("GOOGLE_OAUTH_REDIRECTION_URL"),
+		OpenApiKey:                getEnv("OPENAI_API_KEY"),
+		OpenApiUrl:                getEnv("OPENAI_API_URL"),
 		/*RedisHost:                   getEnv("REDIS_HOST"),
 		RedisPost:                   getEnv("REDIS_PORT"),
 		RedisDB:                     getEnv("REDIS_DB"),

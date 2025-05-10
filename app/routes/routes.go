@@ -2,6 +2,7 @@ package routes
 
 import (
 	"github.com/gofiber/fiber/v2"
+	agentController "hintword.com/api/app/controllers/v1/agent"
 	authController "hintword.com/api/app/controllers/v1/auth"
 	noteController "hintword.com/api/app/controllers/v1/note"
 	tabController "hintword.com/api/app/controllers/v1/tab"
@@ -36,4 +37,7 @@ func SetupRoutes(app *fiber.App) {
 	tab.Post("/collection", tabController.CreateUpdateCollection)
 	tab.Get("/collection", tabController.GetCollection)
 	tab.Post("/create", tabController.CreateUpdateTab)
+
+	agent := v1.Group("/agent", middlewares.RequireLoggedIn())
+	agent.Post("/completion", agentController.Completion)
 }
