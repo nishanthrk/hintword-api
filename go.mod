@@ -11,12 +11,12 @@ require (
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.67
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.79.2
 	github.com/aws/aws-sdk-go-v2/service/ssm v1.58.2
-	github.com/form3tech-oss/jwt-go v3.2.5+incompatible
 	github.com/go-playground/validator/v10 v10.26.0
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/gofiber/fiber/v2 v2.52.6
 	github.com/gofiber/jwt/v2 v2.2.7
-	github.com/golang-jwt/jwt/v5 v5.2.2
+	github.com/gofiber/websocket/v2 v2.2.1
+	github.com/golang-jwt/jwt/v4 v4.5.2
 	github.com/google/uuid v1.6.0
 	github.com/guregu/null v4.0.0+incompatible
 	github.com/joho/godotenv v1.5.1
@@ -52,8 +52,6 @@ require (
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-sql-driver/mysql v1.9.1 // indirect
-	github.com/gofiber/websocket/v2 v2.2.1 // indirect
-	github.com/golang-jwt/jwt/v4 v4.5.2 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect

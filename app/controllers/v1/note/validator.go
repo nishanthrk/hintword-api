@@ -1,6 +1,9 @@
 package note_controller
 
-import "hintword.com/api/app/models"
+import (
+	"gorm.io/datatypes"
+	"hintword.com/api/app/models"
+)
 
 type CreateMessage struct {
 	NoteID  string       `json:"note_id,omitempty"`
@@ -8,9 +11,9 @@ type CreateMessage struct {
 }
 
 type PayloadNote struct {
-	NoteID   string `json:"note_id,omitempty"`
-	Title    string `json:"title" validate:"required"`
-	Content  string `json:"content" validate:"required"`
-	Sequence int64  `json:"sequence" validate:"required"`
-	Status   string `json:"status" validate:"oneof=ACTIVE INACTIVE"`
+	NoteID   string         `json:"note_id,omitempty"`
+	Title    string         `json:"title" validate:"required"`
+	Content  datatypes.JSON `json:"content" validate:"required"`
+	Sequence int64          `json:"sequence" validate:"required"`
+	Status   string         `json:"status" validate:"oneof=ACTIVE INACTIVE"`
 }

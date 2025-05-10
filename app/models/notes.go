@@ -14,7 +14,7 @@ type Notes struct {
 	UserID    string          `gorm:"column:user_id" json:"user_id"`
 	Users     Users           `gorm:"joinForeignKey:user_id;foreignKey:user_id;references:UserID" json:"-"`
 	Title     string          `gorm:"column:title" json:"title"`
-	Content   string          `gorm:"column:content" json:"content"`
+	Content   datatypes.JSON  `gorm:"column:content" json:"content"`
 	Folder    null.String     `gorm:"column:folder" json:"folder"`
 	Tags      *datatypes.JSON `gorm:"column:tags" json:"tags"`
 	Sequence  null.Int        `gorm:"column:sequence" json:"sequence"`

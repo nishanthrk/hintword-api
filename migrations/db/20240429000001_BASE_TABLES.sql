@@ -69,7 +69,7 @@ CREATE TABLE `notes` (
   `note_id` char(36) COLLATE utf8mb4_general_ci NOT NULL,
   `user_id` char(36) COLLATE utf8mb4_general_ci NOT NULL,
   `title` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `content` longtext COLLATE utf8mb4_general_ci NOT NULL,
+  `content` json DEFAULT NULL,
   `folder` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `tags` json DEFAULT NULL,
   `sequence` int(36) DEFAULT NULL,
