@@ -23,6 +23,9 @@ COPY --from=builder /hintword-api/hintword .
 # Copy migrations folder
 COPY --from=builder /hintword-api/migrations ./migrations
 
+# Copy prompt folder
+COPY --from=builder /hintword-api/prompt ./prompt
+
 # Create directory for environment file
 RUN mkdir -p /hintword-api
 
