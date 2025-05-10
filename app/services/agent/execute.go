@@ -3,6 +3,7 @@ package agent_service
 import (
 	"encoding/json"
 	"fmt"
+	"hintword.com/api/app/models"
 	"io"
 	"net/http"
 	"os"
@@ -26,13 +27,13 @@ func loadSystemPrompt(promptType string) (string, error) {
 	return string(content), nil
 }
 
-func Execute(promptType string, note string) (response Response, err error) {
+func Completion(log *models.NoteAiLogs, promptType string, note string) (response Response, err error) {
 	systemPrompt, err := loadSystemPrompt(promptType)
 	if err != nil {
 		return
 	}
 
-	payload := strings.NewReader(fmt.Sprintf(`{
+	payload := fmt.Sprintf(`{
 		"model": "openai/gpt-4.1",
 		"temperature": 1,
 		"top_p": 1,
@@ -46,10 +47,12 @@ func Execute(promptType string, note string) (response Response, err error) {
 				"content": %q
 			}
 		]
-	}`, systemPrompt, note))
+	}`, systemPrompt, note)
+
+	log.RequestPayload = payload
 
 	client := &http.Client{}
-	req, err := http.NewRequest("POST", cfg.GetConfig().OpenApiUrl, payload)
+	req, err := http.NewRequest("POST", cfg.GetConfig().OpenApiUrl, strings.NewReader(payload))
 
 	if err != nil {
 		return
@@ -67,6 +70,8 @@ func Execute(promptType string, note string) (response Response, err error) {
 	if err != nil {
 		return
 	}
+
+	log.ResponsePayload = string(body)
 
 	err = json.Unmarshal(body, &response)
 	return
