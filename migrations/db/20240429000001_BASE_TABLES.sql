@@ -47,7 +47,7 @@ CREATE TABLE `tabs` (
   `user_id` char(36) COLLATE utf8mb4_general_ci NOT NULL,
   `title` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
   `url` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `favicon_url` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `favicon_url` TEXT COLLATE utf8mb4_general_ci DEFAULT NULL,
   `sequence` int(36) DEFAULT NULL,
   `status` varchar(36) COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'ACTIVE',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
