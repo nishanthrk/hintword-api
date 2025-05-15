@@ -1,12 +1,13 @@
 package models
 
 import (
+	"time"
+
 	"github.com/guregu/null"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 	"hintword.com/api/app/common/utility"
 	"hintword.com/api/app/database"
-	"time"
 )
 
 // NoteAiLogs [...]
@@ -23,7 +24,9 @@ type NoteAiLogs struct {
 	AudioURL        null.String       `gorm:"column:audio_url" json:"audioUrl"`
 	ModelUsed       null.String       `gorm:"column:model_used" json:"modelUsed"`
 	LanguageCode    null.String       `gorm:"column:language_code" json:"languageCode"`
+	Status          string            `gorm:"column:status" json:"status"`
 	CreatedAt       time.Time         `gorm:"column:created_at" json:"createdAt"`
+	UpdatedAt       time.Time         `gorm:"column:updated_at" json:"updatedAt"`
 }
 
 // TableName get sql table name.
@@ -44,6 +47,7 @@ var NoteAiLogsColumns = struct {
 	ModelUsed       string
 	LanguageCode    string
 	CreatedAt       string
+	UpdatedAt       string
 }{
 	LogID:           "log_id",
 	NoteID:          "note_id",
@@ -56,6 +60,7 @@ var NoteAiLogsColumns = struct {
 	ModelUsed:       "model_used",
 	LanguageCode:    "language_code",
 	CreatedAt:       "created_at",
+	UpdatedAt:       "updated_at",
 }
 
 func (m *NoteAiLogs) BeforeCreate(tx *gorm.DB) (err error) {
