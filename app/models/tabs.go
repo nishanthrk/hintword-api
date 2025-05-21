@@ -86,6 +86,7 @@ func (m *Tabs) FindById(tabID string) (result Tabs, err error) {
 func (m *Tabs) FindByCollectionId(collectionId string) (result []Tabs, err error) {
 	err = database.MysqlDB.Model(m).
 		Where("`collection_id` = ?", collectionId).
+		Where("`status` = ?", StatusActive).
 		Order("`sequence` asc").
 		Find(&result).Error
 	return
