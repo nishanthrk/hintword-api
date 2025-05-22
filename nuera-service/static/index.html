@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuera Transcription Service</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #transcription {
+            min-height: 200px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            white-space: pre-wrap;
+        }
+        .status {
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Nuera Transcription Service</h1>
+        
+        <div class="controls">
+            <button id="startBtn">Start Recording</button>
+            <button id="stopBtn" disabled>Stop Recording</button>
+            <select id="language">
+                <option value="">Auto Detect</option>
+                <option value="en">English</option>
+                <option value="es">Spanish</option>
+                <option value="fr">French</option>
+                <option value="de">German</option>
+                <option value="it">Italian</option>
+                <option value="pt">Portuguese</option>
+                <option value="nl">Dutch</option>
+                <option value="ja">Japanese</option>
+                <option value="ko">Korean</option>
+                <option value="zh">Chinese</option>
+            </select>
+        </div>
+
+        <div class="status" id="status">Not recording</div>
+        <div id="transcription"></div>
+    </div>
+
+    <script>
+        let mediaRecorder;
+        let ws;
+        let isRecording = false;
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const status = document.getElementById('status');
+        const transcription = document.getElementById('transcription');
+        const language = document.getElementById('language');
+
+        startBtn.addEventListener('click', startRecording);
+        stopBtn.addEventListener('click', stopRecording);
+
+        async function startRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream, {
+                    mimeType: 'audio/webm'
+                });
+
+                ws = new WebSocket(`ws://${window.location.host}/ws/transcribe`);
+                
+                ws.onopen = () => {
+                    ws.send(JSON.stringify({
+                        log_id: Date.now().toString(),
+                        language: language.value
+                    }));
+                };
+
+                ws.onmessage = (event) => {
+                    const response = JSON.parse(event.data);
+                    if (response.status === 'success') {
+                        transcription.textContent += response.text + ' ';
+                    } else if (response.status === 'error') {
+                        console.error('Transcription error:', response.error);
+                    }
+                };
+
+                ws.onerror = (error) => {
+                    console.error('WebSocket error:', error);
+                    status.textContent = 'Error: WebSocket connection failed';
+                };
+
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0 && ws.readyState === WebSocket.OPEN) {
+                        ws.send(event.data);
+                    }
+                };
+
+                mediaRecorder.start(1000); // Send chunks every second
+                isRecording = true;
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                status.textContent = 'Recording...';
+            } catch (error) {
+                console.error('Error starting recording:', error);
+                status.textContent = 'Error: Could not start recording';
+            }
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && isRecording) {
+                mediaRecorder.stop();
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                if (ws) {
+                    ws.close();
+                }
+                isRecording = false;
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+                status.textContent = 'Recording stopped';
+            }
+        }
+    </script>
+</body>
+</html> 

@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.hintword
+    ports:
+      - "9099:9099"
+    env_file:
+      - .env
+    depends_on:
+      - nuera-service
+    networks:
+      - hintword-network
+
+  nuera-service:
+    build:
+      context: ./nuera-service
+      dockerfile: Dockerfile.nuera
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./nuera-service/transcriptions:/app/transcriptions
+    env_file:
+      - .env
+    networks:
+      - hintword-network
+
+networks:
+  hintword-network:
+    driver: bridge 
