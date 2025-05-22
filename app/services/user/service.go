@@ -115,7 +115,7 @@ func GenerateToken(userID string) (string, error) {
 		return "", errors.New("user not found")
 	}
 
-	expireTime := time.Now().Add(time.Hour * 24)
+	expireTime := time.Now().Add((time.Hour * 24) * 30)
 
 	claims := UserClaims{
 		user.UserID,
