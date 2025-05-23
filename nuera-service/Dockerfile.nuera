@@ -4,22 +4,21 @@ FROM python:3.10-slim
 RUN apt-get update && apt-get install -y \
     ffmpeg \
     curl \
+    libavcodec-extra \
+    libavformat-dev \
+    libavutil-dev \
+    libswscale-dev \
+    libavfilter-dev \
     && rm -rf /var/lib/apt/lists/*
-
-# Install Poetry
-RUN curl -sSL https://install.python-poetry.org | python3 -
 
 # Set working directory
 WORKDIR /app
 
-# Copy poetry files
-COPY pyproject.toml poetry.lock* ./
+# Copy requirements file
+COPY requirements.txt .
 
-# Configure poetry
-RUN poetry config virtualenvs.create false
-
-# Install dependencies
-RUN poetry install --no-dev --no-interaction --no-ansi
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY . .
@@ -31,4 +30,4 @@ RUN mkdir -p transcriptions
 EXPOSE 8001
 
 # Run the application
-CMD ["poetry", "run", "python", "main.py"] 
+CMD ["python", "main.py"] 

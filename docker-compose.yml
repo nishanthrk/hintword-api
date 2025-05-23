@@ -7,8 +7,8 @@ services:
       dockerfile: Dockerfile.hintword
     ports:
       - "9099:9099"
-    env_file:
-      - .env
+    volumes:
+      - ./.env:/hintword-api/.env
     depends_on:
       - nuera-service
     networks:
@@ -22,11 +22,10 @@ services:
       - "8001:8001"
     volumes:
       - ./nuera-service/transcriptions:/app/transcriptions
-    env_file:
-      - .env
+      - ./.env:/app/.env
     networks:
       - hintword-network
 
 networks:
   hintword-network:
-    driver: bridge 
+    driver: bridge
