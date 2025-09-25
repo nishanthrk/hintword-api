@@ -22,3 +22,11 @@ type PayloadReorderCollections struct {
 		Sequence     int64  `json:"sequence" validate:"required,min=1"`
 	} `json:"collections" validate:"required,min=1"`
 }
+
+type PayloadReorderTabs struct {
+	CollectionID string `json:"collection_id" validate:"required"`
+	Tabs         []struct {
+		TabID    string `json:"tab_id" validate:"required"`
+		Sequence int64  `json:"sequence" validate:"required,min=1"`
+	} `json:"tabs" validate:"required,min=1"`
+}

@@ -38,6 +38,7 @@ func SetupRoutes(app *fiber.App) {
 	tab.Get("/collection", tabController.GetCollection)
 	tab.Post("/create", tabController.CreateUpdateTab)
 	tab.Post("/reorder", tabController.ReorderCollections)
+	tab.Post("/reorder-tabs", tabController.ReorderTab)
 
 	agent := v1.Group("/agent", middlewares.RequireLoggedIn())
 	agent.Post("/completion", agentController.Completion)

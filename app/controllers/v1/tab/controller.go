@@ -201,3 +201,98 @@ func ReorderCollections(c *fiber.Ctx) error {
 		"collection": collections,
 	})
 }
+
+func ReorderTab(c *fiber.Ctx) error {
+	params := PayloadReorderTabs{}
+	if err := validator.ParseBodyAndValidate(c, &params); err != nil {
+		return c.Status(http.StatusUnprocessableEntity).JSON(&fiber.Map{
+			"status": -1,
+			"error":  err,
+		})
+	}
+
+	userDetails := userService.GetUserObject(c)
+
+	// Verify collection belongs to the user
+	collectionsModel := models.Collections{}
+	collection, err := collectionsModel.FindById(params.CollectionID)
+	if err != nil || collection.CollectionID == "" {
+		return c.Status(http.StatusNotFound).JSON(&fiber.Map{
+			"status": -1,
+			"error":  "Collection not found",
+		})
+	}
+
+	if collection.UserID != userDetails.UserId {
+		return c.Status(http.StatusForbidden).JSON(&fiber.Map{
+			"status": -1,
+			"error":  "Access denied to this collection",
+		})
+	}
+
+	// Verify all tabs belong to the user and collection
+	tabModel := models.Tabs{}
+	for _, tabUpdate := range params.Tabs {
+		tab, err := tabModel.FindById(tabUpdate.TabID)
+		if err != nil || tab.TabID == "" {
+			return c.Status(http.StatusNotFound).JSON(&fiber.Map{
+				"status": -1,
+				"error":  fmt.Sprintf("Tab %s not found", tabUpdate.TabID),
+			})
+		}
+
+		if tab.UserID != userDetails.UserId {
+			return c.Status(http.StatusForbidden).JSON(&fiber.Map{
+				"status": -1,
+				"error":  fmt.Sprintf("Access denied to tab %s", tabUpdate.TabID),
+			})
+		}
+
+		if tab.CollectionID != params.CollectionID {
+			return c.Status(http.StatusBadRequest).JSON(&fiber.Map{
+				"status": -1,
+				"error":  fmt.Sprintf("Tab %s does not belong to collection %s", tabUpdate.TabID, params.CollectionID),
+			})
+		}
+	}
+
+	// Convert to the format expected by BulkUpdateSequences
+	updates := make([]struct {
+		TabID    string `json:"tab_id"`
+		Sequence int64  `json:"sequence"`
+	}, len(params.Tabs))
+
+	for i, tabUpdate := range params.Tabs {
+		updates[i] = struct {
+			TabID    string `json:"tab_id"`
+			Sequence int64  `json:"sequence"`
+		}{
+			TabID:    tabUpdate.TabID,
+			Sequence: tabUpdate.Sequence,
+		}
+	}
+
+	// Update sequences in bulk
+	err = tabModel.BulkUpdateSequences(updates)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(&fiber.Map{
+			"status": -1,
+			"error":  fmt.Sprintf("Failed to reorder tabs: %v", err),
+		})
+	}
+
+	// Return updated tabs in new order
+	tabs, err := tabModel.FindByCollectionId(params.CollectionID)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(&fiber.Map{
+			"status": -1,
+			"error":  fmt.Sprintf("Failed to fetch reordered tabs: %v", err),
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"status":  1,
+		"message": "Tabs reordered successfully",
+		"tabs":    tabs,
+	})
+}
