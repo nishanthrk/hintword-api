@@ -1,10 +1,11 @@
 package models
 
 import (
+	"time"
+
 	"gorm.io/gorm"
 	"hintword.com/api/app/common/utility"
 	"hintword.com/api/app/database"
-	"time"
 )
 
 // Tabs [...]
@@ -90,4 +91,35 @@ func (m *Tabs) FindByCollectionId(collectionId string) (result []Tabs, err error
 		Order("`sequence` asc").
 		Find(&result).Error
 	return
+}
+
+func (m *Tabs) UpdateSequence(tabId string, sequence int64) (err error) {
+	err = database.MysqlDB.Model(m).
+		Where("`tab_id` = ?", tabId).
+		Update("sequence", sequence).Error
+	return
+}
+
+func (m *Tabs) BulkUpdateSequences(updates []struct {
+	TabID    string `json:"tab_id"`
+	Sequence int64  `json:"sequence"`
+}) (err error) {
+	// Use transaction for bulk update
+	tx := database.MysqlDB.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	for _, update := range updates {
+		if err := tx.Model(m).
+			Where("`tab_id` = ?", update.TabID).
+			Update("sequence", update.Sequence).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	return tx.Commit().Error
 }
