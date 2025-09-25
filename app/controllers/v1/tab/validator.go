@@ -15,3 +15,10 @@ type PayloadTab struct {
 	Sequence     int64  `json:"sequence" validate:"required"`
 	Status       string `json:"status" validate:"oneof=ACTIVE INACTIVE"`
 }
+
+type PayloadReorderCollections struct {
+	Collections []struct {
+		CollectionID string `json:"collection_id" validate:"required"`
+		Sequence     int64  `json:"sequence" validate:"required,min=1"`
+	} `json:"collections" validate:"required,min=1"`
+}

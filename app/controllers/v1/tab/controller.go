@@ -2,12 +2,12 @@ package tab_controller
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/gofiber/fiber/v2"
 	"hintword.com/api/app/common/validator"
-	"hintword.com/api/app/database"
 	"hintword.com/api/app/models"
 	userService "hintword.com/api/app/services/user"
-	"net/http"
 )
 
 func CreateUpdateCollection(c *fiber.Ctx) error {
@@ -100,19 +100,18 @@ func CreateUpdateTab(c *fiber.Ctx) error {
 
 func GetCollection(c *fiber.Ctx) error {
 	userDetails := userService.GetUserObject(c)
-	var collections []models.Collections
 
-	if err := database.MysqlDB.
-		Where("user_id = ?", userDetails.UserId).
-		Where("status = ?", models.StatusActive).
-		Order("created_at desc").
-		Find(&collections).Error; err != nil {
+	// Get collections ordered by sequence
+	collectionsModel := models.Collections{}
+	collections, err := collectionsModel.FindByUserOrderedBySequence(userDetails.UserId)
+	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"status": -1,
-			"error":  fmt.Sprintf("Failed to fetch notes: %v", err),
+			"error":  fmt.Sprintf("Failed to fetch collections: %v", err),
 		})
 	}
 
+	// Load tabs for each collection
 	for i, collection := range collections {
 		tab := models.Tabs{}
 		tabs, _ := tab.FindByCollectionId(collection.CollectionID)
@@ -121,6 +120,84 @@ func GetCollection(c *fiber.Ctx) error {
 
 	return c.JSON(fiber.Map{
 		"status":     1,
+		"collection": collections,
+	})
+}
+
+func ReorderCollections(c *fiber.Ctx) error {
+	params := PayloadReorderCollections{}
+	if err := validator.ParseBodyAndValidate(c, &params); err != nil {
+		return c.Status(http.StatusUnprocessableEntity).JSON(&fiber.Map{
+			"status": -1,
+			"error":  err,
+		})
+	}
+
+	userDetails := userService.GetUserObject(c)
+
+	// Verify all collections belong to the user
+	collectionsModel := models.Collections{}
+	for _, collectionUpdate := range params.Collections {
+		collection, err := collectionsModel.FindById(collectionUpdate.CollectionID)
+		if err != nil || collection.CollectionID == "" {
+			return c.Status(http.StatusNotFound).JSON(&fiber.Map{
+				"status": -1,
+				"error":  fmt.Sprintf("Collection %s not found", collectionUpdate.CollectionID),
+			})
+		}
+
+		if collection.UserID != userDetails.UserId {
+			return c.Status(http.StatusForbidden).JSON(&fiber.Map{
+				"status": -1,
+				"error":  fmt.Sprintf("Access denied to collection %s", collectionUpdate.CollectionID),
+			})
+		}
+	}
+
+	// Convert to the format expected by BulkUpdateSequences
+	updates := make([]struct {
+		CollectionID string `json:"collection_id"`
+		Sequence     int64  `json:"sequence"`
+	}, len(params.Collections))
+
+	for i, collectionUpdate := range params.Collections {
+		updates[i] = struct {
+			CollectionID string `json:"collection_id"`
+			Sequence     int64  `json:"sequence"`
+		}{
+			CollectionID: collectionUpdate.CollectionID,
+			Sequence:     collectionUpdate.Sequence,
+		}
+	}
+
+	// Update sequences in bulk
+	err := collectionsModel.BulkUpdateSequences(updates)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(&fiber.Map{
+			"status": -1,
+			"error":  fmt.Sprintf("Failed to reorder collections: %v", err),
+		})
+	}
+
+	// Return updated collections in new order
+	collections, err := collectionsModel.FindByUserOrderedBySequence(userDetails.UserId)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(&fiber.Map{
+			"status": -1,
+			"error":  fmt.Sprintf("Failed to fetch reordered collections: %v", err),
+		})
+	}
+
+	// Load tabs for each collection
+	for i, collection := range collections {
+		tab := models.Tabs{}
+		tabs, _ := tab.FindByCollectionId(collection.CollectionID)
+		collections[i].Tabs = tabs
+	}
+
+	return c.JSON(fiber.Map{
+		"status":     1,
+		"message":    "Collections reordered successfully",
 		"collection": collections,
 	})
 }

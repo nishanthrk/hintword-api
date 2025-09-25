@@ -1,0 +1,277 @@
+# Hintword API - Project Intelligence
+
+## Project Overview
+Hintword API is an intelligent note-taking platform built with Go and Fiber, featuring AI-powered content processing, real-time collaboration, and cloud-native architecture.
+
+## Core Architecture Patterns
+
+### 1. Layered Architecture
+- **Controllers**: Handle HTTP requests/responses (`app/controllers/v1/`)
+- **Services**: Business logic and orchestration (`app/services/`)
+- **Models**: Data persistence with GORM (`app/models/`)
+- **Database**: MySQL with connection pooling (`app/database/`)
+
+### 2. Factory Pattern for External Services
+- **Cloud Storage**: S3 abstraction (`app/factory/cloud_storage/`)
+- **Email Provider**: SendGrid integration (`app/factory/email_provider/`)
+- **SMS Provider**: MSG91 integration (`app/factory/sms_provider/`)
+
+### 3. Middleware Chain
+- **Authentication**: JWT with optional/required auth (`app/middlewares/auth.go`)
+- **Logging**: Structured logging with Logrus (`app/middlewares/logger.go`)
+- **CORS**: Cross-origin resource sharing configuration
+
+## Key Development Patterns
+
+### 1. Configuration Management
+```go
+// Environment-based configuration loading
+switch envMethod {
+case constants.EnvLoadMethodLocal:
+    cfg.LoadLocalConfig()
+case constants.EnvLoadMethodSSM:
+    cfg.LoadSSMConfig()
+}
+```
+
+### 2. Database Operations
+```go
+// GORM model methods for data access
+func (m *Notes) FindById(noteId string) (result Notes, err error) {
+    err = database.MysqlDB.Model(m).Where("`note_id` = ?", noteId).Find(&result).Error
+    return
+}
+```
+
+### 3. API Route Structure
+```go
+// Versioned API with middleware
+v1 := app.Group("/v1", middlewares.OptionalAuth())
+note := v1.Group("/note", middlewares.RequireLoggedIn())
+```
+
+## Critical Implementation Paths
+
+### 1. Authentication Flow
+- JWT tokens with access/refresh strategy
+- Google OAuth integration for user authentication
+- Middleware-based auth with optional and required auth
+- User model with Google ID association
+
+### 2. Note Management
+- JSON content storage in MySQL
+- User association and ownership
+- CRUD operations with GORM
+- AI integration for content processing
+
+### 3. AI Integration
+- OpenAI API integration for content processing
+- AI completion endpoints
+- Content analysis and suggestions
+- Smart categorization features
+
+## Project-Specific Patterns
+
+### 1. Error Handling
+- Structured error responses
+- HTTP status code mapping
+- Validation error handling
+- Logging integration
+
+### 2. Data Models
+- GORM model definitions
+- JSON field handling for flexible content
+- Foreign key relationships
+- Timestamp management
+
+### 3. Service Integration
+- Factory pattern for external services
+- AWS SDK v2 integration
+- OpenAI API integration
+- Email/SMS service abstraction
+
+## Development Workflow
+
+### 1. Local Development
+- `.env` file for local configuration
+- Go 1.23.0 with locked dependencies
+- MySQL 8.0+ with InnoDB
+- Redis for caching and sessions
+
+### 2. Testing Strategy
+- Unit tests for business logic
+- Integration tests for API endpoints
+- Database migration testing
+- CI/CD pipeline validation
+
+### 3. Deployment Process
+- Docker containerization
+- AWS ECR for container registry
+- GitHub Actions for CI/CD
+- EC2 deployment with automated setup
+
+## Known Challenges
+
+### 1. Performance Optimization
+- Database query optimization needed
+- Caching strategy implementation
+- Response time targets (<200ms)
+- Concurrent user scaling
+
+### 2. Security Considerations
+- Input validation enhancement
+- Rate limiting implementation
+- Audit logging requirements
+- Data encryption strategies
+
+### 3. AI Integration
+- OpenAI API dependency management
+- Cost optimization for AI calls
+- Fallback strategies for AI failures
+- Content processing performance
+
+## User Preferences & Workflow
+
+### 1. Development Preferences
+- Go standard formatting and linting
+- Structured logging with Logrus
+- Environment-based configuration
+- Docker-first development approach
+
+### 2. Code Organization
+- Clear separation of concerns
+- Factory pattern for external services
+- Middleware for cross-cutting concerns
+- Versioned API endpoints
+
+### 3. Deployment Preferences
+- Automated CI/CD with GitHub Actions
+- AWS cloud-native services
+- Environment-specific configuration
+- Containerized deployment
+
+## Tool Usage Patterns
+
+### 1. Database Management
+- GORM ORM for database operations
+- Goose for database migrations
+- Connection pooling for performance
+- MySQL with InnoDB engine
+
+### 2. External Service Integration
+- AWS SDK v2 for cloud services
+- OpenAI API for AI features
+- SendGrid for email services
+- MSG91 for SMS services
+
+### 3. Development Tools
+- Fiber v2 for HTTP framework
+- JWT for authentication
+- Redis for caching
+- Docker for containerization
+
+## Evolution of Project Decisions
+
+### 1. Framework Choice
+- **Decision**: Fiber v2 over Gin/Echo
+- **Reason**: High performance and Express.js-like API
+- **Impact**: Fast HTTP handling with middleware support
+
+### 2. Database Strategy
+- **Decision**: MySQL with GORM ORM
+- **Reason**: Relational data with JSON flexibility
+- **Impact**: Structured data with flexible content storage
+
+### 3. Authentication Approach
+- **Decision**: JWT with Google OAuth
+- **Reason**: Stateless authentication with social login
+- **Impact**: Scalable auth with user convenience
+
+### 4. Deployment Strategy
+- **Decision**: Docker on AWS EC2
+- **Reason**: Cost-effective cloud deployment
+- **Impact**: Automated deployment with cloud services
+
+## Critical Dependencies
+
+### 1. Core Dependencies
+- **Fiber v2**: HTTP framework (locked version)
+- **GORM**: Database ORM
+- **JWT**: Authentication
+- **MySQL**: Primary database
+
+### 2. External Services
+- **OpenAI API**: AI processing
+- **Google OAuth**: User authentication
+- **AWS Services**: Cloud infrastructure
+- **SendGrid**: Email services
+
+### 3. Development Tools
+- **Docker**: Containerization
+- **GitHub Actions**: CI/CD
+- **Goose**: Database migrations
+- **Logrus**: Structured logging
+
+## Performance Considerations
+
+### 1. Database Performance
+- Connection pooling with GORM
+- Query optimization needed
+- Indexing strategy required
+- Caching implementation planned
+
+### 2. API Performance
+- Fiber framework optimization
+- Response time targets
+- Concurrent request handling
+- Memory usage optimization
+
+### 3. AI Integration Performance
+- OpenAI API rate limiting
+- Content processing optimization
+- Caching AI responses
+- Fallback strategies
+
+## Security Patterns
+
+### 1. Authentication Security
+- JWT token validation
+- OAuth flow security
+- Token refresh mechanism
+- User session management
+
+### 2. Data Security
+- Input validation and sanitization
+- SQL injection prevention
+- XSS protection
+- Data encryption at rest
+
+### 3. Infrastructure Security
+- AWS IAM permissions
+- Environment variable security
+- Network security groups
+- HTTPS enforcement
+
+## Monitoring & Observability
+
+### 1. Logging Strategy
+- Structured logging with Logrus
+- Request/response logging
+- Error tracking and alerting
+- Performance monitoring
+
+### 2. Application Metrics
+- API response times
+- Database query performance
+- Error rates and patterns
+- User activity tracking
+
+### 3. Infrastructure Monitoring
+- AWS CloudWatch integration
+- Container health monitoring
+- Database performance metrics
+- Deployment success tracking
+
+---
+
+*This file captures project intelligence, patterns, and preferences that help guide development decisions and maintain consistency across the codebase.*
